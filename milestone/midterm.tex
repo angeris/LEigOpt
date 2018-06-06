@@ -1,0 +1,158 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,psfrag,amsmath,amsfonts,verbatim,optidef,mathrsfs}
+\usepackage[small,bf]{caption}
+
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+%\usepackage{pst-grad} % For gradients
+%\usepackage{pst-plot} % For axes
+%\usepackage[space]{grffile} % For spaces in paths
+%\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
+
+\newcommand{\linop}{\mathscr{L}}
+\newcommand{\idop}{\mathbb{I}}
+\newcommand{\ip}[1]{\left\langle{#1}\right\rangle}
+\newcommand{\haml}{\mathcal{H}}
+
+\input defs.tex
+
+\bibliographystyle{alpha}
+
+\title{EE 364B Project Midterm Report: \\ Fast Eigenvalue Optimization for Spectral-Element PDEs}
+\author{John Sholar and Guillermo Angeris}
+
+\begin{document}
+\maketitle
+
+\section{Goal}
+Eigenvalue optimization is a common task in many control problems \cite{boyd1994linear}, inverse design, and, recently, in inference problems on continuous spaces. In this project, we'll attempt to write a fast solver for eigenvalue problems arising from spectral element discretizations of eigenvalue partial differential equations (PDEs).
+
+\section{Motivation}\label{sec:motivation}
+Consider the following problem, which comes up in several different contexts (as an inverse-design problem for example, though an equivalent problem can also come up as the dual of a bundle method approximation, with an appropriate regularizer). Let's say we wish to manufacture a quantum, one-dimensional device that maximizes the ground state energy of a single, non-interacting particle of mass $m$ within the device. We provide a basis of potentials for this problem $\{V^i\}$, where $V^i: \reals\to \reals$, such that all potentials of interest for the design can be written as a convex combination of these potentials. Then, the resulting Schr\"odinger PDE with positive semi-definite form\footnote{Any form for the Schr\"odinger equation can be turned into a positive-semidefinite form by noting that (a) $-\partial_x^2$ is a positive-semidefinite form (by integration by parts with either Dirichlet or vanishing boundary conditions) and that (b) we can normalize all potentials $i\in\{1,\dots,n\}$ to have $\inf_x V^i(x) \ge 0$ since all feasible potentials are bounded from below. This transformation of the potentials does not change the eigenvectors in question and only increases the energy by this constant.} is, for some potential $V(x) = \sum_i \alpha_i V^i(x)$ with $\alpha_i \ge 0$ and $\sum_i \alpha_i = 1$,
+\[
+(\haml(\alpha) \psi)(x) \equiv \left(- \frac{\hbar^2}{2m}\partial_x^2 + \sum_i \alpha_i V^i(x)\right)\psi(x)  = E_0 \psi(x).
+\]
+Here, $\haml(\alpha)$ is known as the Hamiltonian (defined as the linear operator above, which is affine over the $\alpha$) and $E_0$ is the smallest eigenvalue which satisfies the PDE, which we wish to maximize.\footnote{That such an $E_0$ exists follows from the fact that $\haml(\alpha)$ is compact (i.e. maps bounded sets to precompact sets) and self-adjoint (correspondingly, in the finite case, symmetric).} $\psi$ is the corresponding wavefunction of the solution, but the specifics of $\psi$ will not be used further.
+
+We can phrase this problem of minimizing the energy as the following optimization problem over a functional space,\footnote{Since the true problem will be solved in the finite case, we don't concern ourselves with the properties of this functional Hilbert space and assume most of the functions are well-behaved enough for our purposes. For the interested reader, just consider all functions in question (i.e., potentials) to be $C^\infty$. By some basic PDE results, this implies that the solution to the linear PDE above is well-defined and also in $C^\infty$.}
+\begin{maxi*}
+{\alpha, \psi, E_0}{E_0}{}{}
+\addConstraint{\haml(\alpha)\psi}{=E_0\psi}
+\addConstraint{\sum_i \alpha_i}{=1}
+\addConstraint{\alpha_i}{\ge 0 ~~ \forall i.}
+\end{maxi*}
+Noting that, in general, the variables $\psi$ and $E_0$ are completely determined by given values of $\alpha_i$, so finding an optimal set of $\alpha_i$ is enough.
+
+In this form, it is not clear the problem is convex, but (in a similar way to finite spaces), let $H$ be the Hilbert space in question, with $\idop: H \to H$ being the identity operator and, for some linear operator $A: H\to H$, defining
+\[
+A \gek 0 \iff \ip{\phi, A\phi} \ge 0, \forall \phi \in H,
+\]
+then we can rewrite the problem as
+\begin{maxi*}[2]
+{\alpha, E_0}{E_0}{}{}
+\addConstraint{\haml(\alpha)}{\gek E_0\idop}
+\addConstraint{\sum_i \alpha_i}{=1}
+\addConstraint{\alpha_i}{\ge 0 ~~ \forall i,}
+\end{maxi*}
+which is just optimization over a cone.\footnote{It remains to be verified that $E_0 = \min_{\phi \in H}\ip{\phi, \haml(\alpha)\phi }/\ip{\phi, \phi}$, but this is a standard result.}
+
+This is essentially an SDP over the space of linear operators mapping $H\to H$. Assuming any (finite and reasonable)\footnote{\textit{Finite} means that all operators are in $\reals^{n\times n}$, while \textit{reasonable} means that $D^i, \bar I$ are diagonal while $L$ is symmetric.} discretization scheme, then $\partial_x^2 \mapsto L$, $V^i \mapsto D^i$, $\idop \mapsto \bar I$ with all matrices in $\symm^n$, allowing us to rewrite the problem as a usual SDP:
+\begin{maxi*}[2]
+{\alpha, E_0}{E_0}{}{}
+\addConstraint{\left(- \frac{\hbar^2}{2m}L + \sum_i \alpha_i D^i\right)}{\gek E_0\bar I}
+\addConstraint{\sum_i \alpha_i}{=1}
+\addConstraint{\alpha_i}{\ge 0 ~~ \forall i,}
+\end{maxi*}
+where we have plugged the above discretizations into the original definition of $\haml$.
+
+The particular structure of the matrices $L$, $\bar I$ and $D^i$ generated by the SEM discretization makes this problem computationally feasible to optimize with the large domain sizes necessary for these PDEs to be accurate.
+
+Note that we can view the first constraint to be a cone constraint on a linear operator which depends affinely on $\alpha$, call this discretized operator $\linop: \reals^n \to \symm^m$, while the rest of the constraints can be written as affine equalities with a nonnegativity constraint (roughly the same as the LP standard form). This results in the following problem:
+\begin{maxi*}[2]
+{\alpha, E_0}{E_0}{}{}
+\addConstraint{\linop(\alpha)}{\gek E_0\bar I}
+\addConstraint{C\alpha}{=d}
+\addConstraint{\alpha_i}{\ge 0 ~~ \forall i,}
+\end{maxi*}
+for some $C\in \reals^{m\times n}$ and $d \in \reals^{m}$. This is the general problem we consider, with $\linop(\alpha)$ having the structure of interest for every $\alpha$.
+
+\section{Spectral Element Methods and Laplacian Construction}
+A \textit{spectral element method} (SEM)\footnote{Note that this is a class of methods, each generated by different polynomials or quadrature rules.~\cite{Canuto2006}} is a finite-element method for solving PDEs which makes use of high-degree polynomials to approximate functions on a compact domain. The idea is to construct a quadrature rule such that all polynomials of lesser degree have exact integrals when sampled at a particular set of points and use these polynomials as a basis to approximate functions.
+
+In general, these SEM-discretized problems---while sparse---are usually slow to solve in modern optimization packages for even a modest number of points in the discretization domain as they lack the tridiagonal structure that many PDE problems have (e.g., when discretizing by assuming $h^2f''(x) \approx f(x+h) - 2f(x) + f(x-h)$ for fixed $h>0$). In particular, the matrix generated by the spectral elements method is essentially a block-diagonal matrix with small blocks, each of which overlap with the previous block by exactly one element (see Figure~\ref{fig:overlap}), so no completely trivial decomposition can be applied.\footnote{Further, it's important to note that this matrix sparsity pattern is a special case of chordal sparsity~\cite{vandenberghe2015chordal}, which, while fast to solve in general, does not take advantage of the further structure which is obvious from this problem.}
+
+\begin{figure}
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-3.02)(6.84,3.02)
+\definecolor{colour0}{rgb}{0.6,0.6,0.6}
+\definecolor{colour1}{rgb}{0.4,0.4,0.4}
+\psline[linecolor=black, linewidth=0.04](0.42,3.0)(0.02,3.0)(0.02,-3.0)(0.42,-3.0)(0.42,-3.0)
+\psframe[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour0, dimen=outer](2.8273933,2.6074622)(0.82739323,0.60746217)
+\psframe[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour0, dimen=outer](4.42,1.0)(2.42,-1.0)
+\psframe[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour0, dimen=outer](6.02,-0.6)(4.02,-2.6)
+\psline[linecolor=black, linewidth=0.04](6.42,3.0)(6.82,3.0)(6.82,-3.0)(6.42,-3.0)
+\psframe[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour1, dimen=outer](2.82,1.0)(2.42,0.6)
+\psframe[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour1, dimen=outer](4.42,-0.6)(4.02,-1.0)
+\rput[bl](1.62,1.4){$A_1$}
+\rput[bl](3.22,-0.2){$A_2$}
+\rput[bl](4.82,-1.8){$A_3$}
+\end{pspicture}
+}
+\caption{A simple example of the overlapping diagonal elements with three blocks. The darker box indicates a single overlapping element, e.g., $(A_1)_{nn} = (A_2)_{11}$ if $A_1 \in \reals^{n\times n}$.\label{fig:overlap}}
+\end{center}
+\end{figure}
+Our project will take advantage of the structure of these approximately-block-diagonal matrices for fast solutions of eigenvalue problems.
+
+\section{Approaches}
+Let $\linop: \reals^n \to \symm^m$ be affine and have the approximately-block-diagonal structure described in figure \ref{fig:overlap} and let $x \in \reals^n$, then the problem of interest can be written as the dual of a standard-form SDP,
+\begin{mini}
+{x, t}{-b^Tx + t}{}{\label{eq:optim}}
+\addConstraint{\linop(x)}{\lek tI} 
+\addConstraint{Cx}{=d}
+\addConstraint{x}{\gek 0}.
+\end{mini}
+The first inequality is with respect to the semidefinite cone, while the latter is with respect to the positive orthant.
+
+This general optimization problem can be solved in several ways. We will attempt to explore three possibilities: interior point methods for solving these large-scale SDPs, first-order cone-splitting methods, and a consensus approach for solving these problems. 
+
+\subsection{Interior Point Methods}
+
+For interior point methods, rewriting the problem using a barrier method is straightforward
+\begin{mini*}
+{x, t}{-b^Tx + t - \mu\log \det (tI - \linop(x))}{}{}
+\addConstraint{Cx}{=d}
+\addConstraint{x}{\gek 0}.
+\end{mini*}
+If the Cholesky factorization of $X \equiv tI - \linop(x)$ can be easily computed, ($X = L^TL$), this is sufficient as $\log\det X = 2\sum_i \log L_{ii}$, since the determinant of a triangular matrix is the product of its diagonal elements. Solving this barrier-method minimization via most methods is then straightforward.
+
+\subsection{First-Order Cone-Splitting Methods}
+
+In the second case, as in \cite{zheng2017fast} define $E_i \in \reals^{d\times m}$ to be the `selection matrix' given by
+\[
+E_i = \underbrace{\begin{bmatrix}
+\underbrace{\begin{matrix}0_{d \times (d-1)} & \dots & 0_{d \times (d-1)}\end{matrix}}_{i-1} & I_d & 0_{d \times (d-1)} & \dots & 0_{d \times (d-1)}
+\end{bmatrix}}_{b}.
+\]
+where $b$ is the number of sub-blocks of $\linop$ and $d$ is their dimension.
+
+This allows us to rewrite~(\ref{eq:optim}) above to
+\begin{mini*}
+{x, t}{-b^Tx + t}{}{}
+\addConstraint{\linop(x) - tI}{=\sum_i E_i Z_i E_i^T} 
+\addConstraint{Cx}{=d}
+\addConstraint{x}{\gek 0}
+\addConstraint{Z_i}{\gek 0,}{~ i\in\{1, 2, \dots, b\}},
+\end{mini*}
+where projecting the much smaller $Z_i$ matrices (if $d \ll m$, as is the case with the motivating example described in section \ref{sec:motivation}) into the PSD cone is much faster than projecting $\linop(x) - tI$.
+
+\section{Further Thoughts}
+One of the original ideas from the proposal was to use ADMM as a way to split the problem into disjoint minimization + consensus steps. After some amount of work, we were unable to give a simple proximal operator for the projection of the overlapping subregions. After asking Duchi and some further amount of thought, it wasn't clear that attempting to directly hammer this out would yield any more useful insights than simply following another of the two approaches mentioned above.
+
+\bibliography{midterm}
+
+\end{document}

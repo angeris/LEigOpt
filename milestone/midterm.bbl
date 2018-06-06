@@ -1,0 +1,28 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{BEGFB94}
+
+\bibitem[BEGFB94]{boyd1994linear}
+Stephen Boyd, Laurent El~Ghaoui, Eric Feron, and Venkataramanan Balakrishnan.
+\newblock {\em Linear matrix inequalities in system and control theory},
+  volume~15.
+\newblock Siam, 1994.
+
+\bibitem[CHQZ06]{Canuto2006}
+C.~Canuto, M.~Y. Hussaini, A.~Quarteroni, and T.~A. Zang.
+\newblock {\em {Spectral Methods Fundamentals in Single Domains}}.
+\newblock 2006.
+
+\bibitem[VA{\etalchar{+}}15]{vandenberghe2015chordal}
+Lieven Vandenberghe, Martin~S Andersen, et~al.
+\newblock Chordal graphs and semidefinite optimization.
+\newblock {\em Foundations and Trends{\textregistered} in Optimization},
+  1(4):241--433, 2015.
+
+\bibitem[ZFP{\etalchar{+}}17]{zheng2017fast}
+Yang Zheng, Giovanni Fantuzzi, Antonis Papachristodoulou, Paul Goulart, and
+  Andrew Wynn.
+\newblock Fast admm for semidefinite programs with chordal sparsity.
+\newblock In {\em American Control Conference (ACC), 2017}, pages 3335--3340.
+  IEEE, 2017.
+
+\end{thebibliography}

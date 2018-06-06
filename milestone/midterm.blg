@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2017)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: midterm.aux
+The style file: alpha.bst
+Database file #1: midterm.bib
+Warning--empty publisher in Canuto2006
+You've used 4 entries,
+            2543 wiz_defined-function locations,
+            584 strings with 5181 characters,
+and the built_in function-call counts, 1990 in all, are:
+= -- 189
+> -- 122
+< -- 2
++ -- 46
+- -- 46
+* -- 154
+:= -- 340
+add.period$ -- 13
+call.type$ -- 4
+change.case$ -- 29
+chr.to.int$ -- 4
+cite$ -- 5
+duplicate$ -- 72
+empty$ -- 128
+format.name$ -- 48
+if$ -- 399
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 6
+newline$ -- 24
+num.names$ -- 12
+pop$ -- 36
+preamble$ -- 1
+purify$ -- 35
+quote$ -- 0
+skip$ -- 59
+stack$ -- 0
+substring$ -- 93
+swap$ -- 17
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 24
+warning$ -- 1
+while$ -- 17
+width$ -- 7
+write$ -- 54
+(There was 1 warning)

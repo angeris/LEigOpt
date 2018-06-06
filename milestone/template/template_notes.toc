@@ -1,0 +1,25 @@
+\contentsline {section}{\numberline {1}Style guidelines}{3}
+\contentsline {paragraph}{Write good English.}{3}
+\contentsline {paragraph}{Keep the reader in mind.}{3}
+\contentsline {paragraph}{Write to allow skipping over formulas.}{3}
+\contentsline {paragraph}{Be precise with your language.}{3}
+\contentsline {paragraph}{Use the editorial we when appropriate.}{3}
+\contentsline {paragraph}{Punctuation in equations.}{4}
+\contentsline {paragraph}{Don't start a sentence with a symbol.}{4}
+\contentsline {paragraph}{Use words to separate symbols in different formulas.}{4}
+\contentsline {paragraph}{References.}{4}
+\contentsline {paragraph}{Do not italicize English in math mode.}{5}
+\contentsline {paragraph}{Spacing.}{5}
+\contentsline {paragraph}{Use of notation and jargon.}{6}
+\contentsline {paragraph}{Sections.}{7}
+\contentsline {paragraph}{Use capitalization consistently.}{7}
+\contentsline {paragraph}{Use the right commands.}{7}
+\contentsline {paragraph}{Writing optimization problems.}{8}
+\contentsline {paragraph}{Sentence-ending periods.}{8}
+\contentsline {paragraph}{Commas.}{8}
+\contentsline {paragraph}{Tables and figures.}{8}
+\contentsline {paragraph}{\LaTeX \ in figures.}{8}
+\contentsline {paragraph}{Dialects.}{10}
+\contentsline {paragraph}{No rule is absolute.}{10}
+\contentsline {section}{\numberline {2}Source code}{10}
+\contentsline {section}{\numberline {3}Content}{10}
