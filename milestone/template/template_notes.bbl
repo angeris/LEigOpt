@@ -1,0 +1,69 @@
+\begin{thebibliography}{CSRL01}
+
+\bibitem[BV04]{BoV:04}
+S.~Boyd and L.~Vandenberghe.
+\newblock {\em Convex Optimization}.
+\newblock Cambridge University Press, 2004.
+
+\bibitem[CSRL01]{Cormen:2001}
+T.~H. Cormen, C.~Stein, R.~L. Rivest, and C.~E. Leiserson.
+\newblock {\em Introduction to Algorithms}.
+\newblock McGraw-Hill Higher Education, 2nd edition, 2001.
+
+\bibitem[CT91]{Cover:1991}
+T.~M. Cover and J.~A. Thomas.
+\newblock {\em Elements of Information Theory}.
+\newblock Wiley-Interscience, 1991.
+
+\bibitem[Eva10]{Evans:2010}
+L.~C. Evans.
+\newblock {\em Partial Differential Equations}.
+\newblock American Mathematical Society, 2010.
+
+\bibitem[Gol80]{Goldstein:1980}
+H.~Goldstein.
+\newblock {\em Classical Mechanics}.
+\newblock Addison-Wesley Publishing Company, 2nd edition, 1980.
+
+\bibitem[Hal70]{Halmos:1970}
+P.~R. Halmos.
+\newblock How to write mathematics.
+\newblock {\em L'Enseignement Math\'{e}matique}, 16:123--152, 1970.
+
+\bibitem[HTF01]{Hastie:2001}
+T.~Hastie, R.~Tibshirani, and J.~Friedman.
+\newblock {\em The Elements of Statistical Learning}.
+\newblock Springer, 2001.
+
+\bibitem[KLR89]{Knuth:1989}
+D.~E. Knuth, T.~Larrabee, and P.~M. Roberts.
+\newblock {\em Mathematical Writing}, volume~14 of {\em MAA notes}.
+\newblock Mathematical Association of America, 1989.
+
+\bibitem[Knu73]{Knuth:1973}
+D.~E. Knuth.
+\newblock {\em The Art of Computer Programming, Volume I: Fundamental
+  Algorithms}.
+\newblock Addison-Wesley, 2nd edition, 1973.
+
+\bibitem[Rud76]{Rudin:1976}
+W.~Rudin.
+\newblock {\em Principles of Mathematical Analysis}.
+\newblock McGraw-Hill Book Co., third edition, 1976.
+
+\bibitem[Sip01]{Sipser:2001}
+M.~Sipser.
+\newblock {\em Introduction to the Theory of Computation}.
+\newblock Thomson Course Technology, 2001.
+
+\bibitem[SW57]{SW:59}
+W.~Strunk and E.~White.
+\newblock {\em The Elements of Style}.
+\newblock Macmillan, 1957.
+
+\bibitem[Tre08]{Tref:2008}
+L.~N. Trefethen.
+\newblock Is {G}auss quadrature better than {C}lenshaw-{C}urtis?
+\newblock {\em SIAM Review}, 50:67--87, 2008.
+
+\end{thebibliography}
