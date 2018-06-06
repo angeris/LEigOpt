@@ -276,6 +276,8 @@ sparsity_pattern_rows = np.array([op[0] for op in vector_to_matrix])
 sparsity_pattern_cols = np.array([op[1] for op in vector_to_matrix])
 matrix_to_vector = {p:i for i, p in enumerate(vector_to_matrix)}
 
+np.random.seed(1234)
+
 # A_0_sparse = form_laplacian(n)
 A_0_sparse = scipy.sparse.csr_matrix((n,n))
 A_0_sparse[sparsity_pattern_rows, sparsity_pattern_cols] = np.random.randn(len(sparsity_pattern_rows))
@@ -318,7 +320,7 @@ t = cvx.Variable()
 objective = cvx.Minimize(-t)
 constraints = [A_0_sparse.todense() - t * np.eye(A_0_sparse.shape[0]) >> 0]
 problem = cvx.Problem(objective, constraints)
-cvx_optimal_value = problem.solve(solver='SCS', verbose=True, eps=1e-2)
+cvx_optimal_value = problem.solve(solver='SCS', verbose=True, eps=1e-2, max_iters=10000)
 cvx_end = time.time()
 print('CVX delta: {0:.3f}%'.format(100*abs(cvx_optimal_value + target)/abs(target)))
 print('CVX elapsed time: {0}'.format(cvx_end - cvx_start))
