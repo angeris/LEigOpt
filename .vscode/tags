@@ -1,0 +1,56 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+A_0_nz	../project.py	/^A_0_nz = A_0_sparse.nonzero()$/;"	kind:variable	line:285
+A_0_sparse	../project.py	/^A_0_sparse = 10*(A_0_sparse + A_0_sparse.T)\/2$/;"	kind:variable	line:284
+A_0_sparse	../project.py	/^A_0_sparse = scipy.sparse.csr_matrix((n,n))$/;"	kind:variable	line:282
+A_0_sparse_vectorized	../project.py	/^A_0_sparse_vectorized = A_0_sparse[A_0_nz]$/;"	kind:variable	line:286
+A_nz_list	../project.py	/^A_nz_list = [A_sparse_list[i].nonzero() for i in range(len(A_sparse_list))]$/;"	kind:variable	line:289
+A_sparse_list	../project.py	/^A_sparse_list = [-np.eye(n)]$/;"	kind:variable	line:288
+A_sparse_vectorized_list	../project.py	/^A_sparse_vectorized_list = [A_sparse_list[i][A_nz_list[i]] for i in range(len(A_sparse_list))]$/;"	kind:variable	line:290
+alternating_projections_iteration	../project.py	/^def alternating_projections_iteration(A_0_sparse, A_0_nz, $/;"	kind:function	line:183
+b	../project.py	/^b = 10$/;"	kind:variable	line:263
+bsr_matrix	../project.py	/^from scipy.sparse import bsr_matrix, csc_matrix, diags, eye$/;"	kind:namespace	line:7
+c	../project.py	/^c = -np.ones((1,1))$/;"	kind:variable	line:292
+csc_matrix	../project.py	/^from scipy.sparse import bsr_matrix, csc_matrix, diags, eye$/;"	kind:namespace	line:7
+cvx	../project.py	/^import cvxpy as cvx$/;"	kind:namespace	line:1
+diags	../project.py	/^from scipy.sparse import bsr_matrix, csc_matrix, diags, eye$/;"	kind:namespace	line:7
+eye	../project.py	/^from scipy.sparse import bsr_matrix, csc_matrix, diags, eye$/;"	kind:namespace	line:7
+form_laplacian	../project.py	/^def form_laplacian(n):$/;"	kind:function	line:14
+itertools	../project.py	/^import itertools$/;"	kind:namespace	line:6
+lambda_dual_var	../project.py	/^lambda_dual_var = scipy.sparse.csr_matrix((n,n))$/;"	kind:variable	line:295
+linalg	../project.py	/^import scipy.linalg$/;"	kind:namespace	line:5
+matplotlib	../project.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:3
+matrix_to_vector	../project.py	/^matrix_to_vector = {p:i for i, p in enumerate(vector_to_matrix)}$/;"	kind:variable	line:277
+matrix_to_vector	../project.py	/^matrix_to_vector= {} # Map (i, j) to k$/;"	kind:variable	line:268
+n	../project.py	/^n = b + (num_blocks - 1) * (b - 1)$/;"	kind:variable	line:264
+np	../project.py	/^import numpy as np$/;"	kind:namespace	line:2
+num_A	../project.py	/^num_A = 1$/;"	kind:variable	line:261
+num_blocks	../project.py	/^num_blocks = 75$/;"	kind:variable	line:262
+params	../project.py	/^params = [$/;"	kind:variable	line:298
+pinv_C_cache	../project.py	/^pinv_C_cache = {}$/;"	kind:variable	line:297
+plt	../project.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:3
+project.py	../project.py	1;"	kind:file	line:1
+project_psd_cone	../project.py	/^def project_psd_cone(dense_A):$/;"	kind:function	line:118
+projection_dual_feasibility_equality_1	../project.py	/^def projection_dual_feasibility_equality_1(A_0_sparse, A_0_nz, $/;"	kind:function	line:52
+projection_dual_feasibility_equality_2	../project.py	/^def projection_dual_feasibility_equality_2(A_0_sparse, A_0_nz, $/;"	kind:function	line:85
+projection_primal_feasibility_equality	../project.py	/^def projection_primal_feasibility_equality(A_0_sparse, A_0_nz, $/;"	kind:function	line:123
+projection_strong_duality	../project.py	/^def projection_strong_duality(A_0_sparse, A_0_nz, $/;"	kind:function	line:24
+run_alternating_projections	../project.py	/^def run_alternating_projections():$/;"	kind:function	line:19
+scipy	../project.py	/^import scipy$/;"	kind:namespace	line:4
+scipy	../project.py	/^import scipy.linalg$/;"	kind:namespace	line:5
+sigma_dual_var_list	../project.py	/^sigma_dual_var_list = [np.zeros((b,b)) for _ in range(num_blocks)]$/;"	kind:variable	line:296
+sparsity_pattern_cols	../project.py	/^sparsity_pattern_cols = np.array([op[1] for op in vector_to_matrix])$/;"	kind:variable	line:276
+sparsity_pattern_rows	../project.py	/^sparsity_pattern_rows = np.array([op[0] for op in vector_to_matrix])$/;"	kind:variable	line:275
+start	../project.py	/^start = time.time()$/;"	kind:variable	line:311
+target	../project.py	/^target = np.linalg.eigvalsh(A_0_sparse.todense()).min()$/;"	kind:variable	line:308
+time	../project.py	/^import time$/;"	kind:namespace	line:8
+top_left	../project.py	/^    top_left = ((b - 1) * block_index, (b - 1) * block_index)$/;"	kind:variable	line:271
+tqdm	../project.py	/^from tqdm import tqdm$/;"	kind:namespace	line:9
+vector_to_matrix	../project.py	/^vector_to_matrix = list(vector_to_matrix_set)$/;"	kind:variable	line:274
+vector_to_matrix_set	../project.py	/^vector_to_matrix_set = set() $/;"	kind:variable	line:269
+x_primal_var	../project.py	/^x_primal_var = np.zeros(1)$/;"	kind:variable	line:293
+z_primal_var_list	../project.py	/^z_primal_var_list = [np.zeros((b,b)) for _ in range(num_blocks)]$/;"	kind:variable	line:294
