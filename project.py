@@ -259,8 +259,8 @@ def alternating_projections_iteration(A_0_sparse, A_0_nz,
         lambda_dual_var[top_left_idx:top_left_idx+b, top_left_idx:top_left_idx+b] = submat
 
 num_A = 1
-num_blocks = 10
-b = 40
+num_blocks = 75
+b = 10
 n = b + (num_blocks - 1) * (b - 1)
 
 
@@ -315,12 +315,12 @@ for iteration in tqdm(range(2000)):
     alternating_projections_iteration(*params, run_checks=False)
 print('Elapsed time: {0}'.format(time.time() - start))
 print('Convergence delta: {0:.3f}%'.format(100*abs(x_primal_var[0] - target)/abs(target)))
-cvx_start = time.time()
-t = cvx.Variable()
-objective = cvx.Minimize(-t)
-constraints = [A_0_sparse.todense() - t * np.eye(A_0_sparse.shape[0]) >> 0]
-problem = cvx.Problem(objective, constraints)
-cvx_optimal_value = problem.solve(solver='SCS', verbose=True, eps=1e-2, max_iters=10000)
-cvx_end = time.time()
-print('CVX delta: {0:.3f}%'.format(100*abs(cvx_optimal_value + target)/abs(target)))
-print('CVX elapsed time: {0}'.format(cvx_end - cvx_start))
+# cvx_start = time.time()
+# t = cvx.Variable()
+# objective = cvx.Minimize(-t)
+# constraints = [A_0_sparse - t * scipy.sparse.eye(A_0_sparse.shape[0]) >> 0]
+# problem = cvx.Problem(objective, constraints)
+# cvx_optimal_value = problem.solve(solver='SCS', verbose=True, eps=1e-2, max_iters=10000)
+# cvx_end = time.time()
+# print('CVX delta: {0:.3f}%'.format(100*abs(cvx_optimal_value + target)/abs(target)))
+# print('CVX elapsed time: {0}'.format(cvx_end - cvx_start))
