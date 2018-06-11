@@ -1,8 +1,10 @@
-include("optimizer.jl")
+include("optimizer_proj.jl")
+
+srand(1234)
 
 # Generate some matrix
 b = 10
-num_blocks = 200
+num_blocks = 100
 n = num_blocks*(b-1) + 1
 
 A = spzeros(n, n)
@@ -15,8 +17,11 @@ end
 A = (A + A')/2;
 
 all_A = SparseMatrixCSC{Float64, Int64}[]
-push!(all_A, speye(n))
-C = [1]
-d = [0]
+push!(all_A, A)
+for i = 1:10
+    push!(all_A, -speye(size(A, 1)))
+end
+C = ones(1,10)
+d = ones(1)
 
 optimize(all_A, C, d)

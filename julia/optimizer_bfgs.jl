@@ -11,7 +11,7 @@ end
 function _grad_inv(chol_L::Base.SparseArrays.CHOLMOD.Factor{Float64},
     B::SparseMatrixCSC{Float64,Int64},
     b_penalty::Float64)
-
+    
     tr = 0
     
     for i = 1:size(B, 2)
@@ -44,6 +44,20 @@ end
 function _eval(x, l, chol_L, A_list, C, d, a_penalty, b_penalty)
     resid = C*x[2:end] - d
     return resid, -x[1] - b_penalty*logdet(chol_L) + l'*resid + (a_penalty/2)*vecnorm(resid)^2
+end
+
+function !_grad(grad_store, x::Array{Float64,1}, l::Array{Float64,1}, 
+                chol_L::Base.SparseArrays.CHOLMOD.Factor{Float64}, 
+                A_list::Array{SparseMatrixCSC{Float64, Int64},1}, 
+                C::Array{Float64, 2}, d::Array{Float64, 1},
+                a_penalty::Float64, b_penalty::Float64)
+
+                
+    grad_store .= _gradient(x::Array{Float64,1}, l::Array{Float64,1}, 
+                            chol_L::Base.SparseArrays.CHOLMOD.Factor{Float64}, 
+                            A_list::Array{SparseMatrixCSC{Float64, Int64},1}, 
+                            C::Array{Float64, 2}, d::Array{Float64, 1},
+                            a_penalty::Float64, b_penalty::Float64)
 end
 
 function optimize(A_list, C, d; init_augmented_penalty=1., 
@@ -80,58 +94,14 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
     converged = false
 
     for curr_iter = 1:max_iter
-        inner_optim_success = false
 
-        # Gradient iterations
-        for curr_inner_iter = 1:max_inner_iter
-            curr_grad = _gradient(curr_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
-
-            if vecnorm(curr_grad) <= grad_tol
-                inner_optim_success = true
-                break
-            end
-
-            # Feasibility iterations
-            for feas_iter = 1:max_inner_iter
-                tent_x = curr_x - step_size*curr_grad
-                _form_L!(A_list, tent_x, curr_L)
-
-                try
-                    cholfact!(chol_L, curr_L)
-                    resid, curr_eval = _eval(tent_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
-                    
-                    if curr_eval > prev_eval
-                        step_size *= .5
-                        continue
-                    end
-
-                    prev_eval = curr_eval
-                    step_size *= 1.2
-                    curr_x = tent_x
-
-                    break
-
-                catch y
-                    if isa(y, Base.LinAlg.PosDefException)
-                        chol_L = copy(init_chol)
-                        step_size *= .5
-                    else
-                        error("the exception $y was thrown when it should not have been. Please file a bug report!")
-                    end
-                end
-            end
-            # End feasibility iterations
-        end
-        # End gradient iterations
-
-        if !inner_optim_success
-            warn("inner optimization did not terminate, continuing.")
-        end
 
         resid, curr_eval = _eval(curr_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
 
         curr_l += resid
         prev_eval = Inf
+
+        b_penalty *= .1
 
         resid = vecnorm(C*curr_x[2:end] - d)
 
@@ -153,8 +123,6 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
             end
 
             a_penalty *= 2
-        else
-            b_penalty *= .1
         end
     end
 

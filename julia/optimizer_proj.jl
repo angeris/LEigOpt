@@ -21,11 +21,10 @@ function _grad_inv(chol_L::Base.SparseArrays.CHOLMOD.Factor{Float64},
     return -b_penalty*tr
 end
 
-function _gradient(x::Array{Float64,1}, l::Array{Float64,1}, 
+function _gradient(x::Array{Float64,1}, 
                    chol_L::Base.SparseArrays.CHOLMOD.Factor{Float64}, 
                    A_list::Array{SparseMatrixCSC{Float64, Int64},1}, 
-                   C::Array{Float64, 2}, d::Array{Float64, 1},
-                   a_penalty::Float64, b_penalty::Float64)
+                   b_penalty::Float64)
 
     const size_n = size(chol_L, 1)
 
@@ -36,20 +35,21 @@ function _gradient(x::Array{Float64,1}, l::Array{Float64,1},
         grad_complete[mat_idx] = _grad_inv(chol_L, A_list[mat_idx], b_penalty)
     end
 
-    grad_complete[2:end] += C'*(l + a_penalty*(C*x[2:end] - d))
-
     return grad_complete
 end
 
-function _eval(x, l, chol_L, A_list, C, d, a_penalty, b_penalty)
-    resid = C*x[2:end] - d
-    return resid, -x[1] - b_penalty*logdet(chol_L) + l'*resid + (a_penalty/2)*vecnorm(resid)^2
+function _eval(x, chol_L, A_list, b_penalty)
+    return -x[1] - b_penalty*logdet(chol_L)
+end
+
+function _proj(x, C_q, C_r, d_dagger)
+    return d_dagger - C_q*(C_q'*x) + x
 end
 
 function optimize(A_list, C, d; init_augmented_penalty=1., 
                   init_barrier_penalty=1., verbose=true, max_iter=10,
                   max_inner_iter=1000, init_step_size=1., eps_tol=1e-3,
-                  dual_gap_tol=1e-3, grad_tol=1e-2)
+                  dual_gap_tol=1e-5, grad_tol=1e-2, alpha = 1)
 
     a_penalty = init_augmented_penalty
     b_penalty = init_barrier_penalty
@@ -77,6 +77,9 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
         info("Starting solve")
     end
 
+    C_q, C_r = qr([zeros(size(C, 1)) C]')
+    d_dagger = C_q*(C_r'\d)
+
     converged = false
 
     for curr_iter = 1:max_iter
@@ -84,21 +87,25 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
 
         # Gradient iterations
         for curr_inner_iter = 1:max_inner_iter
-            curr_grad = _gradient(curr_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
+            curr_grad = _gradient(curr_x, chol_L, A_list, b_penalty)
 
-            if vecnorm(curr_grad) <= grad_tol
+            resid = vecnorm(C_q*(C_q' * curr_grad) - curr_grad)
+            println("curr resid : $resid")
+            if resid <= grad_tol
                 inner_optim_success = true
                 break
             end
 
             # Feasibility iterations
             for feas_iter = 1:max_inner_iter
-                tent_x = curr_x - step_size*curr_grad
+                tent_pre_proj = curr_x - step_size*curr_grad
+                tent_x = alpha*_proj(tent_pre_proj, C_q, C_r, d_dagger) + (1-alpha)*tent_pre_proj
+
                 _form_L!(A_list, tent_x, curr_L)
 
                 try
                     cholfact!(chol_L, curr_L)
-                    resid, curr_eval = _eval(tent_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
+                    curr_eval = _eval(tent_x, chol_L, A_list, b_penalty)
                     
                     if curr_eval > prev_eval
                         step_size *= .5
@@ -128,9 +135,10 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
             warn("inner optimization did not terminate, continuing.")
         end
 
-        resid, curr_eval = _eval(curr_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
+        curr_eval = _eval(curr_x, curr_l, chol_L, A_list, C, d, a_penalty, b_penalty)
 
-        curr_l += resid
+        b_penalty *= .1
+
         prev_eval = Inf
 
         resid = vecnorm(C*curr_x[2:end] - d)
@@ -145,16 +153,6 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
             end
             converged = true
             break
-        end
-
-        if b_penalty <= dual_gap_tol
-            if verbose
-                info("converged for dual problem, solving primal feasibility")
-            end
-
-            a_penalty *= 2
-        else
-            b_penalty *= .1
         end
     end
 
