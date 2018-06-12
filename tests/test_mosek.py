@@ -3,15 +3,22 @@ import numpy as np
 import scipy
 import time
 import mosek
+import cvxopt
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--b', default=10, type=int)
+parser.add_argument('--num_blocks', default=10, type=int)
+args = parser.parse_args()
 
 np.random.seed(364)
 
 # Generate some matrix
-b = 10
-num_blocks = 10
+b = args.b
+num_blocks = args.num_blocks
 n = num_blocks*(b-1) + 1
 
-A = scipy.sparse.csr_matrix(np.zeros(shape=(n, n)))
+A = scipy.sparse.csc_matrix(np.zeros(shape=(n, n)))
 
 for i in range(num_blocks):
   top_left = i*(b-1)
@@ -28,7 +35,6 @@ for i in range(10):
 C = np.ones(shape=(1,10))
 d = np.ones(shape=(1,))
 
-start_mosek = time.time()
 
 # Mosek
 t = cvx.Variable()
@@ -38,12 +44,14 @@ L = -t * scipy.sparse.eye(n)
 for i in range(1, len(all_A)):
     L += all_A[i]*x[i-1]
 
+solver='CVXOPT'
 L += all_A[0]
 objective = cvx.Minimize(-t)
 constraints = [C * x == d, x >= 0, L >> 0]
 problem = cvx.Problem(objective, constraints)
-problem.solve(verbose=True, solver='MOSEK')
 
-end_mosek = time.time()
+start_solver = time.time()
+problem.solve(verbose=True, solver=solver)
+end_solver = time.time()
 
-print('Time for Mosek solve: {0}'.format(end_mosek - start_mosek))
+print('Time for {0} solve: {1}'.format(solver, end_solver - start_solver))
