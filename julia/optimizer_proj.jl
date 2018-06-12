@@ -32,14 +32,14 @@ function _gradient(x::Array{Float64,1},
     grad_complete[1] = -1 - _grad_inv(chol_L, speye(size_n), b_penalty)
 
     for mat_idx = 2:length(A_list)
-        grad_complete[mat_idx] = _grad_inv(chol_L, A_list[mat_idx], b_penalty)
+        grad_complete[mat_idx] = _grad_inv(chol_L, A_list[mat_idx], b_penalty) - b_penalty/x[mat_idx]
     end
 
     return grad_complete
 end
 
 function _eval(x, chol_L, A_list, b_penalty)
-    return -x[1] - b_penalty*logdet(chol_L)
+    return -x[1] - b_penalty*logdet(chol_L) - sum(log.(x[2:end]))
 end
 
 function _proj(x, C_q, C_r, d_dagger)
@@ -132,9 +132,8 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
         linop_init .= linop_init + curr_x[i]*A_list[i]
     end
 
-    # Feasible starting point
+    # Construct a feasible starting point
     eig_vals = eigs(linop_init, nev=1, which=:SR)[1]
-    println(eig_vals)
     curr_x[1] = eig_vals[1] - 1
 
     curr_L = linop_init - curr_x[1]*speye(size(A_list[1], 1))
@@ -165,8 +164,6 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
             curr_grad .= _gradient(curr_x, chol_L, A_list, b_penalty)
 
             resid = vecnorm(C_q*(C_q' * curr_grad) - curr_grad)
-            println("curr resid : $resid")
-            println("curr_x : $curr_x")
             if resid <= grad_tol
                 inner_optim_success = true
                 break
@@ -181,6 +178,11 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
 
                 try
                     cholfact!(chol_L, curr_L)
+                    if any(tent_x[2:end] .<= 0)
+                        step_size *= .5
+                        continue
+                    end
+
                     curr_eval = _eval(tent_x, chol_L, A_list, b_penalty)
                     
                     if curr_eval > prev_eval
