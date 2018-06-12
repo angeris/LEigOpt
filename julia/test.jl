@@ -31,18 +31,3 @@ C = ones(1,10)
 d = ones(1)
 
 @time optimize(all_A, C, d)
-
-# Mosek
-# t = Variable()
-# x = Variable(length(all_A) - 1)
-
-# L = -t*speye(n)
-# for i = 2:length(all_A)
-#     L += all_A[i]*x[i-1]
-# end
-# L += all_A[1]
-# prob = minimize(-t, [isposdef(L), C*x == d])
-
-# @time solve!(prob, CVXOPT())
-
-# @time solve!(prob, SCSSolver())
