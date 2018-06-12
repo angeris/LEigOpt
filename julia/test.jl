@@ -1,3 +1,6 @@
+using Convex
+using Mosek
+
 include("optimizer_proj.jl")
 
 srand(1234)
@@ -36,4 +39,4 @@ for i = 2:length(all_A)
 end
 L += all_A[1]
 prob = minimize(-t, [isposdef(L), C*x == d])
-@time solve!(prob)
+@time solve!(prob, MosekSolver())
