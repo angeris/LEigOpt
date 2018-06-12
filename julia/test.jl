@@ -7,7 +7,7 @@ srand(1234)
 
 # Generate some matrix
 b = 10
-num_blocks = 75
+num_blocks = 100
 n = num_blocks*(b-1) + 1
 
 A = spzeros(n, n)
