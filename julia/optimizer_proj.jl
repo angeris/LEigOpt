@@ -13,7 +13,6 @@ function _grad_inv(chol_L::Base.SparseArrays.CHOLMOD.Factor{Float64},
     b_penalty::Float64)
 
     tr = 0
-    
     for i = 1:size(B, 2)
         tr += (chol_L \ full(B[:,i]))[i]
     end
@@ -112,7 +111,7 @@ function _feas_point(C, d, init_barrier_penalty; max_iter = 100, eps_start = 1e-
 end
 
 function optimize(A_list, C, d; init_augmented_penalty=1., 
-                  init_barrier_penalty=.1, verbose=true, max_iter=10,
+                  init_barrier_penalty=1., verbose=true, max_iter=10,
                   max_inner_iter=1000, init_step_size=100., eps_tol=1e-3,
                   dual_gap_tol=1e-5, grad_tol=1e-2, alpha = 1)
 
@@ -134,6 +133,7 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
 
     # Construct a feasible starting point
     eig_vals = eigs(linop_init, nev=1, which=:SR)[1]
+    println("Eigenvalue : $(eig_vals[1])")
     curr_x[1] = eig_vals[1] - 1
 
     curr_L = linop_init - curr_x[1]*speye(size(A_list[1], 1))
@@ -177,6 +177,7 @@ function optimize(A_list, C, d; init_augmented_penalty=1.,
                 _form_L!(A_list, tent_x, curr_L)
 
                 try
+                    # info("curr iter $feas_iter")
                     cholfact!(chol_L, curr_L)
                     if any(tent_x[2:end] .<= 0)
                         step_size *= .5

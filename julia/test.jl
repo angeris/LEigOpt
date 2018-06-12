@@ -7,7 +7,7 @@ srand(1234)
 
 # Generate some matrix
 b = 10
-num_blocks = 10
+num_blocks = 75
 n = num_blocks*(b-1) + 1
 
 A = spzeros(n, n)
@@ -16,6 +16,9 @@ for i = 1:num_blocks
     top_left = (i-1)*(b-1) + 1
     A[top_left:top_left+b-1, top_left:top_left+b-1] .= randn(b, b)
 end
+
+println("Number of nonzeros : $(nnz(A))")
+println("Total number of possible nonzeros $(prod(size(A)))")
 
 A = (A + A')/2;
 
@@ -28,15 +31,3 @@ C = ones(1,10)
 d = ones(1)
 
 @time optimize(all_A, C, d)
-
-# Mosek
-t = Variable()
-x = Variable(length(all_A) - 1)
-
-L = -t*speye(n)
-for i = 2:length(all_A)
-    L += all_A[i]*x[i-1]
-end
-L += all_A[1]
-prob = minimize(-t, [isposdef(L), C*x == d])
-@time solve!(prob, MosekSolver())
